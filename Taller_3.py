@@ -356,6 +356,7 @@ print(df_segmentacion.groupby('Cluster_KMeans')[['Frecuencia', 'CantidadTotal', 
 print("\nAgrupamiento por Mean Shift:")
 print(df_segmentacion.groupby('Cluster_MeanShift')[['Frecuencia', 'CantidadTotal', 'TotalGastado', 'Recencia']].mean())
 
+#KMEANS
 #Implementación de nombres
 #Definir función para asignar etiquetas a los clusters de K-Means
 def identificar_cluster_kmeans(cluster_numero):
@@ -373,6 +374,24 @@ df_segmentacion['Etiqueta_Cluster_KMeans'] = df_segmentacion['Cluster_KMeans'].a
 # 3. Verificar las primeras filas
 print(df_segmentacion[['Customer ID', 'Cluster_KMeans', 'Etiqueta_Cluster_KMeans']].drop_duplicates().head())
 
+#MEAN SHIFT
+# Función para clasificar perfiles de clientes según agrupamiento por Mean Shift
+def clasificar_mean_shift(row):
+    if row['Frecuencia'] > 50 and row['TotalGastado'] > 20000 and row['Recencia'] < 30:
+        return "Clientes VIP"
+    elif row['Frecuencia'] > 20 and row['TotalGastado'] > 5000 and row['Recencia'] < 60:
+        return "Clientes Recurrentes"
+    elif row['Frecuencia'] >= 5 and row['TotalGastado'] >= 500:
+        return "Clientes Estables"
+    else:
+        return "Clientes Inactivos"
+
+# Aplicar la función al DataFrame df_segmentacion
+df_segmentacion['Perfil_MeanShift'] = df_segmentacion.apply(clasificar_mean_shift, axis=1)
+
+# Verificar las primeras filas clasificadas
+print(df_segmentacion[['Customer ID', 'Frecuencia', 'TotalGastado', 'Recencia', 'Perfil_MeanShift']].drop_duplicates().head())
+
 # Visualización con PCA y guardado de gráficos
 
 # Aplicar PCA
@@ -383,21 +402,6 @@ X_pca = pca.fit_transform(X_seg)
 df_plot = pd.DataFrame(X_pca, columns=['PCA1', 'PCA2'])
 df_plot['Cluster_KMeans'] = df_segmentacion['Cluster_KMeans']
 df_plot['Cluster_MeanShift'] = df_segmentacion['Cluster_MeanShift']
-
-# Gráfico K-Means
-plt.figure(figsize=(12, 6))
-for cluster in sorted(df_plot['Cluster_KMeans'].unique()):
-    subset = df_plot[df_plot['Cluster_KMeans'] == cluster]
-    plt.scatter(subset['PCA1'], subset['PCA2'], label=f'Cluster {cluster}', alpha=0.6)
-plt.title('Visualización de Clusters (K-Means) con PCA')
-plt.xlabel('Componente Principal 1')
-plt.ylabel('Componente Principal 2')
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.subplots_adjust(top=0.92)
-plt.savefig(os.path.join(directorio0, "Clusters_KMeans_PCA.png"))
-plt.close()
 
 # Gráfico Mean Shift
 plt.figure(figsize=(12, 6))
@@ -414,6 +418,43 @@ plt.subplots_adjust(top=0.92)
 plt.savefig(os.path.join(directorio0, "Clusters_MeanShift_PCA.png"))
 plt.close()
 
+#2
+# Aplicar PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_seg)
+
+# Crear DataFrame para graficar
+df_plot = pd.DataFrame(X_pca, columns=['PCA1', 'PCA2'])
+df_plot['Etiqueta_Cluster_KMeans'] = df_segmentacion['Etiqueta_Cluster_KMeans']
+df_plot['Perfil_MeanShift'] = df_segmentacion['Perfil_MeanShift']
+
+# Gráfico K-Means
+plt.figure(figsize=(12, 6))
+for etiqueta in sorted(df_plot['Etiqueta_Cluster_KMeans'].unique()):
+    subset = df_plot[df_plot['Etiqueta_Cluster_KMeans'] == etiqueta]
+    plt.scatter(subset['PCA1'], subset['PCA2'], label=etiqueta, alpha=0.6)
+plt.title('Visualización PCA - Segmentos K-Means')
+plt.xlabel('Componente Principal 1')
+plt.ylabel('Componente Principal 2')
+plt.legend(title="Segmento")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(os.path.join(directorio0, "PCA_KMeans_Segmentos.png"))
+plt.close()
+
+# Gráfico Mean Shift
+plt.figure(figsize=(12, 6))
+for perfil in sorted(df_plot['Perfil_MeanShift'].unique()):
+    subset = df_plot[df_plot['Perfil_MeanShift'] == perfil]
+    plt.scatter(subset['PCA1'], subset['PCA2'], label=perfil, alpha=0.6)
+plt.title('Visualización PCA - Perfiles de Clientes (Mean Shift)')
+plt.xlabel('Componente Principal 1')
+plt.ylabel('Componente Principal 2')
+plt.legend(title="Perfil")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(os.path.join(directorio0, "PCA_MeanShift_Perfiles.png"))
+plt.close()
 
 # =========================================
 # PARTE 3: Predicción de ventas:
