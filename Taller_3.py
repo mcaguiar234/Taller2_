@@ -184,19 +184,6 @@ df_consolidado['TipoCliente'] = df_consolidado['TotalGastado'].apply(
 # Ver distribución
 print(df_consolidado['TipoCliente'].value_counts())
 
-print(df_consolidado[['Customer ID', 'TotalGastado', 'TipoCliente']].drop_duplicates().head())
-
-# Calcular el umbral de gasto premium (Q3)
-q3_gasto = gasto_por_cliente['TotalGastado'].quantile(0.75)
-
-# Crear columna de clasificación binaria
-df_consolidado['TipoCliente'] = df_consolidado['TotalGastado'].apply(
-    lambda x: 'Premium' if x > q3_gasto else 'Normal'
-)
-
-# Ver distribución general
-print(df_consolidado['TipoCliente'].value_counts())
-
 # Vista rápida de clientes clasificados
 print(df_consolidado[['Customer ID', 'TotalGastado', 'TipoCliente']].drop_duplicates().head())
 
@@ -260,7 +247,7 @@ print(confusion_matrix(y_test, y_pred))
 #Profundidad del arbol
 print("Profundidad del árbol:", modelo_arbol.get_depth())
 
-#COMPARACIÓN CON UN MODELO DE REGRESIÓN LINEAL
+#COMPARACIÓN CON UN MODELO DE REGRESIÓN LOGISTICA
 # Crear el modelo
 modelo_logistico = LogisticRegression(random_state=42)
 
