@@ -26,6 +26,7 @@ from sklearn.cluster import MeanShift
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
     
 directorio0 = "C:/Users/aguia/OneDrive/MAESTRIA/FUNDAMENTOS CIENCIA DE DATOS/TALLER 3/graficos"
 # =========================================
@@ -354,6 +355,23 @@ print(df_segmentacion.groupby('Cluster_KMeans')[['Frecuencia', 'CantidadTotal', 
 # Mean Shift
 print("\nAgrupamiento por Mean Shift:")
 print(df_segmentacion.groupby('Cluster_MeanShift')[['Frecuencia', 'CantidadTotal', 'TotalGastado', 'Recencia']].mean())
+
+#Implementación de nombres
+#Definir función para asignar etiquetas a los clusters de K-Means
+def identificar_cluster_kmeans(cluster_numero):
+    etiquetas = {
+        0: "Clientes Poco Activos",
+        1: "Clientes Estables",
+        2: "Clientes Recurrentes",
+        3: "Clientes VIP"
+    }
+    return etiquetas.get(cluster_numero, "Desconocido")
+
+# 2. Aplicar la función a la columna 'Cluster_KMeans' del DataFrame
+df_segmentacion['Etiqueta_Cluster_KMeans'] = df_segmentacion['Cluster_KMeans'].apply(identificar_cluster_kmeans)
+
+# 3. Verificar las primeras filas
+print(df_segmentacion[['Customer ID', 'Cluster_KMeans', 'Etiqueta_Cluster_KMeans']].drop_duplicates().head())
 
 # Visualización con PCA y guardado de gráficos
 
